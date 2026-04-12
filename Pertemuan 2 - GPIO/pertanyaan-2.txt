@@ -1,0 +1,87 @@
+1. Rangkaiain Schematic
+
+2. Mengapa menggunakan INPUT_PULLUP
+jawab: Push button menggunakan INPUT_PULLUP agar pin memiliki kondisi default HIGH tanpa resistor eksternal, sehingga saat ditekan menjadi LOW. Keuntungannya adalah rangkaian lebih sederhana, tidak butuh komponen tambahan, dan lebih stabil dari gangguan noise.
+
+2. Jika salah satu LED segmen tidak menyala, kemungkinan penyebabnya
+jawab:
+hardware - LED segment rusak, kabel lepas/salah, resistor bermasalah, atau jenis 7-segment tidak sesuai (common anode/cathode)
+software - kesalahan pada digitPattern atau mapping pin di segmentPins sehingga segment tidak mendapat sinyal yang benar 
+
+3. Modifikasi jadi 2 tombol (increment & decrement)
+jawab: 
+
+#include <Arduino.h>
+
+// Array pin untuk 7-segment (a–g + dp)
+const int segmentPins[8] = {7, 6, 5, 11, 10, 8, 9, 4};
+
+// Tombol tambah dan kurang
+const int btnUp = 2;
+const int btnDown = 3;
+
+// Pola angka 0–F
+byte digitPattern[16][8] = {
+    {1,1,1,1,1,1,0,0}, {0,1,1,0,0,0,0,0}, {1,1,0,1,1,0,1,0}, {1,1,1,1,0,0,1,0},
+    {0,1,1,0,0,1,1,0}, {1,0,1,1,0,1,1,0}, {1,0,1,1,1,1,1,0}, {1,1,1,0,0,0,0,0},
+    {1,1,1,1,1,1,1,0}, {1,1,1,1,0,1,1,0}, {1,1,1,0,1,1,1,0}, {0,0,1,1,1,1,1,0},
+    {1,0,0,1,1,1,0,0}, {0,1,1,1,1,0,1,0}, {1,0,0,1,1,1,1,0}, {1,0,0,0,1,1,1,0}
+};
+
+int currentDigit = 0; // nilai awal
+
+bool lastUpState = HIGH;
+bool lastDownState = HIGH;
+
+// Fungsi untuk menampilkan angka
+void displayDigit(int num)
+{
+    for (int i = 0; i < 8; i++)
+    {
+        digitalWrite(segmentPins[i], !digitPattern[num][i]);
+    }
+}
+
+void setup()
+{
+    // Set semua pin segment sebagai output
+    for (int i = 0; i < 8; i++)
+    {
+        pinMode(segmentPins[i], OUTPUT);
+    }
+
+    // Set tombol sebagai input pullup
+    pinMode(btnUp, INPUT_PULLUP);
+    pinMode(btnDown, INPUT_PULLUP);
+
+    displayDigit(currentDigit); // tampilkan angka awal
+}
+
+void loop()
+{
+    // Baca kondisi tombol
+    bool upState = digitalRead(btnUp);
+    bool downState = digitalRead(btnDown);
+
+    // Jika tombol UP ditekan
+    if (lastUpState == HIGH && upState == LOW)
+    {
+        currentDigit++; // tambah
+        if (currentDigit > 15)
+            currentDigit = 0; // kembali ke 0
+        displayDigit(currentDigit);
+    }
+
+    // Jika tombol DOWN ditekan
+    if (lastDownState == HIGH && downState == LOW)
+    {
+        currentDigit--; // kurang
+        if (currentDigit < 0)
+            currentDigit = 15; // kembali ke F
+        displayDigit(currentDigit);
+    }
+
+    // Simpan state sebelumnya
+    lastUpState = upState;
+    lastDownState = downState;
+}

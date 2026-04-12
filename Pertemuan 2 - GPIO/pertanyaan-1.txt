@@ -1,0 +1,22 @@
+1. Rangkaian Schematic
+
+
+2. Apa yang terjadi jika nilau num > 15 ?
+Jawab: program arduino akan bermasalah karena mengakses index array diluar jangkauan  (out of bounds) yang nentinya akan terdaoat bug saat read data dengan tampilan menjadi acak 
+
+3. Program ini memakai common cathode / commone anode ? jelaskan
+Jawab: program ini menggunakan common anode pada kode -> digitalWrite(segmentPins[i], !digitPattern[num][i]);
+
+common cathode - nyala = HIGH tidak perlu !
+commong anode - nyala = LOW perlu ! 
+
+pada kasus diatas segmeny menyala jika diberi LOW (0) dab segment mati jika HIGH (1)
+
+4. Modifikasi program agar tampilan berjalan dari F ke 0
+Jawab: dengan cara membalik arah perulangan
+
+for (int i = 15; i >= 0; i--)
+{
+  displayDigit(i);
+  delay(1000);
+}
