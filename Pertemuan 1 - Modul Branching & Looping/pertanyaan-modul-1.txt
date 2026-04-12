@@ -1,0 +1,91 @@
+Pertanyaan Pratikum Modul - 1
+
+1. Gambarkan rangkaian schematic 5 LED running yang digunakan pada percobaan!
+- alat dan bahan : Arduino UNO R3, 6 LED, kabel jamper, resistor 6, kabel GND (ground)
+- wiring komponen
+| KOMPONEN | RESISTOR | PIN |
+|   LED 1	1	2	
+|   LED 2	2	3
+|   LED 3	3	4
+|   LED 4	4	5
+|   LED 5	5	6
+|   LED 6	6	7
+|   GND		-	GND
+
+- arus kelistrikan : sumber sarus besalah dari outup pin digital arhuino dari pin 2-7 dan gnd ; arus mengalir melalui resistor sebagai penghambat unutk mebatasi arus yang masuk ke LED ; arus masuk ke LED melalui anode (kaki positif / panjang) ke anoda (kaki pendek / negative) ; seteah kelaur dari LED melalui path negative arus mengalir ke pin GND 
+
+2. Jelaskan bagaimana program membuat efek LED berjalan dari kiri ke kanan!
+jawab : propes unutk membuat efek LED sequence menggunanan loop ledPin berdasarkan nomor yang ada di breadboardnya dengan menggunakan initiate nomor pin terendah dan increment ke ledPin nomor tertinggi ; setelah dilakukan increment +=1 maka lampu led dengan pin terendah akan berada dalam kondisi 'HIGH' (nyala) selama 0.1 second dan akan dalam akan berlanjut kondisi 'LOW' (mati) ; setelah mati akan melakukan increment dan melakukan kondisi HIGH, delay, LOW ke ledPin nomor lebih besar selanjutnya 
+
+
+3. Jelaskan bagaimana program membuat LED kembali dari kanan ke kiri!
+Jawab : proses untuk membuat efek LED sequence menggunakan loop ledPin berdasarkan nomor LEP yang ada di breadboardnya dengan menggunakan initiate nomor pin terenda dan decrement ke ledPin nomor terendah ; setelah silakukan decrement -=1 maka lampu led dengan pin tertinggi akan berada dalam kondisi 'HIGH' (nyala) selama 0.1 second dan akan berlanjut kondisi 'LOW' (mati) ; setelah mati akan melakukan decrement dan melakukan kondisi HIGH, delay, LOW ke ledPin nomor lebih besar selanjutnya
+
+*perlu diketahui bahsa kedua loop increment dan decrement antar ledPin saling terhubung dengan spesifikasi dalam case ini program melakukan efek LED berjalan dari kiri ke kanan (ledPin nomor rendah ke tinggi) bdaru ika loop selesai maka dilanjutkan ke loop efek LED berjalan dari kanan ke kiri (ledPin nomor tinggi ke rendah)
+
+4. Buatkan program agar LED menyala tiga LED kanan dan tiga LED kiri secara bergantian
+dan berikan penjelasan disetiap baris kode nya dalam bentuk README.md!	
+Jawab : Source Code
+int timer = 100 ;
+
+void setup() {
+  // put your setup code here, to run once:
+  for (int ledPin = 2; ledPin < 8; ledPin++){
+    pinMode(ledPin, OUTPUT);
+  }
+}
+
+void loop() {
+  // menyalakan LED kiri (pin 2, 3, 4)
+  for (int ledPin = 2; ledPin <= 4; ledPin++){
+    digitalWrite(ledPin, HIGH);
+  }
+
+  // mematikan LED kiri
+  for (int ledPin = 2; ledPin <= 4; ledPin++){
+    digitalWrite(ledPin, LOW);
+  }
+
+  // menyalakan LED kanan (pin 2, 3, 4)
+  for (int ledPin = 5; ledPin <= 7; ledPin++){
+    digitalWrite(ledPin, HIGH);
+  }
+
+  // mematikan LED kanan
+  for (int ledPin = 5; ledPin <= 7; ledPin++){
+    digitalWrite(ledPin, LOW);
+}
+
+Penjelasan per baris 
+- int timer = 100 ; mendeklarasikan variable timer dengan nimal 100 ms sebagai delay LED menyala
+
+- void setup() ; fungsi yang dijalankan sekali saat Arduino pertama kali dinyalakan
+
+- for (int ledPin = 2; ledPin < 8; ledPin++) ; perulangan dari pin 2 sampai 7 
+
+- pinMmode(ledPin, OUTPUT) ; mengatur setiap pin dari 2 - 7 sebagai keluaran 
+
+
+- void loop() ; fungsi yang berjalan terus selama Arduino menyala
+
+- for (int ledPin = 2; ledPin <= 4; ledPin++){
+  digitalWrite(ledPin, HIGH);
+} ; perulangan LED pin 2 - 4 agar semua LED menyala semua
+
+- delay(timer) ; jeda Waktu 100 ms sebelum mematikan LED pin 2 - 4
+
+- for (int ledPin = 2; ledPin <= 4; ledPin++){
+  digitalWrite(ledPin, LOW);
+} ; perulanngan untuk mematikan LED pin 2 - 4 
+
+- delay(timer); jeda Waktu 100 ms sebelum menyalakan LED pin 5 - 7
+
+- - for (int ledPin = 5; ledPin <= 7; ledPin++){
+  digitalWrite(ledPin, HIGH);
+} ; perulangan LED pin 5 - 7 agar semua LED menyala semua
+
+- delay(timer) ; jeda Waktu 100 ms sebelum mematikan LED pin 5 - 7
+
+- for (int ledPin = 5; ledPin <= 7; ledPin++){
+  digitalWrite(ledPin, LOW);
+} ; perulanngan untuk mematikan LED pin 5 - 7 
