@@ -1,0 +1,84 @@
+# Percobaan 1 - Serial Komunikasi
+1. Proses dari input keyboard hingga LED menyala
+Jawab : Proses dimulai saat karakter diketik di Serial Monitor dan dikirim melalui kabel USB menggunakan protokol UART. Arduino menerima bit data tersebut melalui pin RX, kemudian fungsi Serial.read() mengambilnya untuk diproses oleh program. Jika data yang terbaca sesuai dengan logika program (seperti '1' atau '0'), mikrokontroler akan mengubah tegangan pada pin digital untuk menyalakan atau mematikan LED.
+
+2. Mengapa digunakan Serial.avalaible() sebelum membaca data? apa yang terjadi jika dihilangkan
+Jawab : memastikan ada data yang masuk ke dalam buffer sebelum proses pembacaan dilakukan. Jika baris ini dihilangkan, Serial.read() akan terus berjalan di setiap perulangan dan mencoba membaca data meskipun tidak ada input, yang mengakibatkan munculnya pesan kesalahan atau "Perintah tidak dikenal" secara berulang-ulang di layar karena sistem memproses nilai kosong.
+
+3. Modifikasi program agar LED berkedip (blink) ketika menerima input '2' dengan kondisi jika ‘2’ aktif maka LED akan terus berkedip sampai perintah selanjutnya diberikan
+Jawab : 
+
+--- SNIPPER PRUBAHAN KODE ---
+// Tambahkan variabel global ini di atas setup()
+char mode = '0'; 
+unsigned long previousMillis = 0;
+const long interval = 500; 
+bool ledState = LOW;
+
+// Ganti isi loop() dengan logika ini
+void loop() {
+  if (Serial.available() > 0) {
+    char data = Serial.read(); // Baca 1 karakter [cite: 132, 133]
+    if (data == '1' || data == '0' || data == '2') {
+      mode = data; // Simpan perintah terakhir
+      if (mode == '1') digitalWrite(PIN_LED, HIGH); // LED ON [cite: 141]
+      else if (mode == '0') digitalWrite(PIN_LED, LOW); // LED OFF [cite: 149]
+    }
+  }
+
+  // Logika blink non-blocking (Hanya aktif jika mode == '2')
+  if (mode == '2') {
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      ledState = !ledState;
+      digitalWrite(PIN_LED, ledState);
+    }
+  }
+}
+
+4. Tentukan apakah menggunaan delay() atau milis() ; jelaskan pengaruhnya terhadap sistem
+Jawab : Penggunaan millis() sangat disarankan daripada delay() karena bersifat non-blocking, yang memungkinkan Arduino tetap memantau input baru di Serial Monitor sambil mengatur waktu kedipan LED secara bersamaan. Jika menggunakan delay(), sistem akan berhenti total selama waktu tunggu tersebut, sehingga Arduino menjadi tidak responsif dan tidak bisa segera memproses perintah mati atau nyala yang dikirimkan pengguna saat LED sedang berkedip
+
+# Percobaan 2 -
+1. Jelaskan bagaimana cara kerja kounikasi I2C antara Arduino dan LCD 
+Jawab : Komunikasi ini menggunakan prinsip Master-Slave melalui dua jalur kabel, yaitu SDA (data) dan SCL (jam). Arduino sebagai Master mengirimkan data ke LCD sebagai Slave berdasarkan I2C Address unik yang berfungsi sebagai identitas tujuan perangkat. Proses pengiriman bit data disinkronkan oleh sinyal clock agar data dibaca dengan benar oleh LCD.
+
+2. Apakah pin potensiometer harus sesuai rangkaian ? apa yang terjadi jika pin kiri dan kanan tertukar
+Jawab : Pin tengah (wiper) wajib terhubung ke pin analog (A0) sebagai jalur pembacaan tegangan variabel. Jika pin kiri (GND) dan pin kanan (5V) tertukar, posisi fisik potensiometer akan terbalik; putaran yang seharusnya meningkatkan nilai ADC justru akan menurunkannya, namun secara fungsional rangkaian tetap aman
+
+3. Modifikasi program dengan menggabungkan antara UART dan I2C (keduanya sebagai output)
+Jawab : 
+
+void loop() {
+  int nilai = analogRead(pinPot);
+  float volt = nilai * (5.0 / 1023.0); // Konversi ke Volt
+  int persen = map(nilai, 0, 1023, 0, 100); // Konversi ke Persen
+  int panjangBar = map(nilai, 0, 1023, 0, 16);
+
+  // Output ke Serial Monitor (UART)
+  Serial.print("ADC: "); Serial.print(nilai);
+  Serial.print(" Volt: "); Serial.print(volt, 2); Serial.print(" V");
+  Serial.print(" Persen: "); Serial.print(persen); Serial.println("%");
+
+  // Output ke LCD (I2C)
+  lcd.setCursor(0, 0);
+  lcd.print("ADC: "); lcd.print(nilai); lcd.print(" "); lcd.print(persen); lcd.print("%   ");
+  
+  lcd.setCursor(0, 1);
+  for (int i = 0; i < 16; i++) {
+    if (i < panjangBar) lcd.print((char)255); // Bar level
+    else lcd.print(" ");
+  }
+  delay(200);
+}
+
+4. Lengkapi table berikut berdasarkan pengamatan pada Serial Monitor
+Jawab : 
+
+ADC      |    Volt (V)    | Persen (%)
+1        |       0.0 V    |     0.10 %  
+21       |       0.10 V   |     2.05 %  
+49       |       0.24 V   |     4.79 %  
+74       |       0.36 V   |     7.23 %  
+96       |       0.47 V   |     9.38 %  
