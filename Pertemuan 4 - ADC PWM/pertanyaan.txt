@@ -1,0 +1,39 @@
+PERTANYAAN PERCOBAAN 1: ADC
+1. Apa fungsi perintah analogRead() pada rangkaian praktikum ini?
+Jawab: Berfungsi untuk membaca tegangan analog yang masuk pada pin input (A0) dan mengubahnya menjadi nilai digital diskrit beresolusi 10-bit. Nilai tegangan (0V hingga 5V) akan dikonversi menjadi angka antara 0 hingga 1023
+
+2. Mengapa diperlukan fungsi map() dalam program tersebut?
+Jawab: Karena terdapat perbedaan skala antara input dan output. Potensiometer menghasilkan nilai 0–1023, sedangkan library Servo membutuhkan input sudut 0–180. Fungsi map() secara matematis menskalakan nilai ADC tersebut agar proporsional dengan rentang sudut servo.
+
+3. Modifikasi program berikut agar servo hanya bergerak dalam rentang 30° hingga 150°, meskipun potensiometer tetap memiliki rentang ADC 0–1023
+Jawab: 
+// Perubahan pada bagian konversi data
+pos = map(val, 0, 1023, 30, 150);
+
+
+PERTANYAAN PERCOBAAN 2: PWM
+1. Jelaskan mengapa LED dapat diatur kecerahannya menggunakan fungsi analogWrite()!
+Jawab: LED dapat diatur kecerahannya karena fungsi ini menggunakan teknik PWM. PWM tidak benar-benar menurunkan tegangan, melainkan menyalakan dan mematikan LED dengan sangat cepat (frekuensi tinggi). Semakin lama durasi "ON" dibandingkan "OFF" dalam satu siklus (Duty Cycle), maka LED akan terlihat semakin terang oleh mata manusia.
+
+2. Apa hubungan antara nilai ADC (0–1023) dan nilai PWM (0–255)?
+Jawab: Nilai ADC memiliki resolusi 10-bit (0–1023), sedangkan nilai PWM pada Arduino standar memiliki resolusi 8-bit (0–255). Hubungannya adalah rasio 4:1. Artinya, setiap kenaikan 4 satuan pada ADC kira-kira setara dengan kenaikan 1 satuan pada PWM.
+
+3. Modifikasilah program berikut agar LED hanya menyala pada rentang kecerahan sedang, yaitu hanya ketika nilai PWM berada pada rentang 50 sampai 200.
+Jawab: 
+void loop() {
+  nilaiADC = analogRead(potPin);
+  pwm = map(nilaiADC, 0, 1023, 0, 255);
+
+  // Modifikasi agar LED hanya menyala di rentang PWM 50 - 200
+  if (pwm >= 50 && pwm <= 200) {
+    analogWrite(ledPin, pwm);
+  } else {
+    analogWrite(ledPin, 0); // Matikan LED jika di luar rentang
+  }
+
+  Serial.print("ADC: ");
+  Serial.print(nilaiADC);
+  Serial.print(" | PWM: ");
+  Serial.println(pwm);
+  delay(50);
+}
