@@ -1,0 +1,40 @@
+# PERCOBAAN #1 MULTITASKING
+
+1. Apakah ketiga task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
+Jawab: Secara teknis, pada mikrokontroler dengan satu core (seperti Arduino Uno), ketiga task tersebut berjalan secara bergantian dengan sangat cepat, sehingga terlihat seolah-olah berjalan bersamaan (multitasking concurrent).  
+Mekanismenya:
+- Kernel Scheduler: RTOS memiliki komponen bernama Kernel Scheduler yang mengatur pembagian waktu CPU untuk setiap task.  
+- Preemptive Scheduling: Scheduler akan menghentikan sementara satu task untuk memberikan kesempatan pada task lain berdasarkan prioritas atau slot waktu tertentu.  
+- vTaskDelay: Saat sebuah task memanggil vTaskDelay, task tersebut memasuki kondisi Blocked, memberikan kesempatan bagi task lain yang sudah siap (Ready) untuk dijalankan oleh scheduler.  
+
+
+2. Bagaimana cara menambahkan task keempat? Jelaskan langkahnya!
+Jawab: Untuk menambahkan task keempat, Anda perlu mengikuti langkah-langkah berikut:
+- Deklarasi Fungsi: Tambahkan prototipe fungsi untuk task baru di bagian atas program, misalnya: void TaskEmpat(void *pvParameters);.
+- Pembuatan Task: Panggil fungsi xTaskCreate() di dalam void setup() untuk meregistrasikan task baru tersebut ke dalam scheduler. Pastikan memberikan nama, ukuran stack, dan prioritas yang sesuai.  
+- Implementasi Fungsi: Buat isi fungsi TaskEmpat dengan struktur while(1) atau for(;;) agar task terus berjalan, dan gunakan vTaskDelay() agar tidak memonopoli CPU.  
+
+
+3. Modifikasi dengan Potensiometer untuk Kecepatan LED
+Jawab: Jika program dimodifikasi dengan potensiometer:
+- Cara Kerja: Nilai analog dari potensiometer dibaca menggunakan analogRead(). Nilai ini kemudian dikonversi menjadi milidetik yang digunakan sebagai parameter dalam fungsi vTaskDelay().  
+- Hasilnya: Kecepatan kedip LED menjadi dinamis. Ketika poros potensiometer diputar, nilai delay berubah, sehingga LED akan berkedip lebih cepat atau lebih lambat sesuai dengan input fisik dari pengguna.
+
+# PERCOBAAN #2 KOMUNIKASI Task
+1. Apakah kedua task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
+Jawab: Kedua task berjalan secara bergantian melalui mekanisme penjadwalan RTOS. Mekanismenya:
+- Task read_data: Task ini berjalan lebih dulu untuk mengisi data ke dalam antrean (Queue) menggunakan xQueueSend(). 
+- Task display: Task ini akan menunggu hingga ada data yang tersedia di dalam antrean. Jika antrean kosong, task ini akan berada dalam kondisi Blocked karena parameter portMAX_DELAY pada fungsi xQueueReceive().  
+- Sinkronisasi: Begitu read_data mengirimkan data, scheduler akan membangunkan task display untuk memproses dan menampilkan data tersebut ke Serial Monitor.  
+
+
+2. Apakah program ini berpotensi mengalami race condition? Jelaskan!
+Jawab: Program ini memiliki potensi sangat rendah atau bahkan aman dari race condition karena menggunakan Queue (Antrean).  Penjelasan:
+- Queue dalam FreeRTOS dirancang secara internal untuk menjadi thread-safe. Saat satu task mengakses antrean, mekanisme RTOS memastikan akses tersebut eksklusif.  
+- Data dikirim melalui penyalinan (copy by value) ke dalam buffer antrean, sehingga kedua task tidak memperebutkan alamat memori yang sama secara langsung untuk variabel x yang berbeda di masing-masing task.  
+
+
+3. Modifikasi dengan Sensor DHT (Dinamis)
+Jawab: Jika program dimodifikasi menggunakan sensor DHT asli:
+- Cara Kerja: Di dalam task read_data, nilai x.temp dan x.h tidak lagi diisi angka statis (seperti 54 atau 30), melainkan diisi dengan hasil pembacaan sensor menggunakan library DHT.  
+- Hasilnya: Output pada Serial Monitor akan berubah-ubah secara real-time sesuai dengan kondisi suhu dan kelembapan lingkungan di sekitar sensor. Hal ini menunjukkan keberhasilan komunikasi antar-task dalam mengirimkan data sensor yang dinamis untuk ditampilkan.
